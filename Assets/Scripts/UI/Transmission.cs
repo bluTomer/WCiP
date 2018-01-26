@@ -8,6 +8,11 @@ public class Transmission : MonoBehaviour
     public class Data
     {
         public SignalKey[] Signals;
+
+        public Data()
+        {
+            Signals = new SignalKey[NUMBER_OF_SIGNALS];
+        }
     }
     
     public const int NUMBER_OF_SIGNALS = 4;
@@ -30,6 +35,14 @@ public class Transmission : MonoBehaviour
         }
 
         return data;
+    }
+
+    public void Clear()
+    {
+        for (int i = 0; i < NUMBER_OF_SIGNALS; i++)
+        {
+            RemoveSignal(i);
+        }
     }
     
     public void RemoveSignal(int index)

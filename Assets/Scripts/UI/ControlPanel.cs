@@ -29,6 +29,7 @@ public class ControlPanel : MonoBehaviour
         {
             OnLaunchTransmission(_currentTransmission.GetData());
         }
+        _currentTransmission.Clear();
     }
 
     public void OnSignalPanelSignalClicked(Signal signal)

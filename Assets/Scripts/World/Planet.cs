@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Planet : MonoBehaviour
 {
@@ -25,12 +27,25 @@ public class Planet : MonoBehaviour
 	private void Start()
 	{
 		_parentPos = transform.parent.position;
+		RandomizeGoal();
+		Likeness = 1.0f;
 	}
-
+	
 	private void Update()
 	{
 		transform.RotateAround(_parentPos, Vector3.forward, RotationSpeed * Time.deltaTime);
 		transform.RotateAround(transform.position, Vector3.forward, RotationSpeed * Time.deltaTime * -1.0f);
+	}
+
+	private void RandomizeGoal()
+	{
+		GoalTransmission = new Transmission.Data();
+		for (int i = 0; i < Transmission.NUMBER_OF_SIGNALS; i++)
+		{
+			var enumValues = Enum.GetValues(typeof(SignalKey));
+			var randomValue = (SignalKey)enumValues.GetValue(Random.Range(0, enumValues.Length));
+			GoalTransmission.Signals[i] = randomValue;
+		}
 	}
 
 	private void OnCollisionEnter2D(Collision2D other)
@@ -42,13 +57,13 @@ public class Planet : MonoBehaviour
 			return;
 		}
 		
-		EvaluateTransmission(ray.Transmission);
+		LastTransmission = ray.Transmission;
+		LastEvaluation = EvaluateTransmission(ray.Transmission);
 		Destroy(ray.gameObject);
 	}
 
 	private Evaluation EvaluateTransmission(Transmission.Data transmission)
 	{
-		LastTransmission = transmission;
 		var eval = new Evaluation();
 
 		for (int i = 0; i < Transmission.NUMBER_OF_SIGNALS; i++)
