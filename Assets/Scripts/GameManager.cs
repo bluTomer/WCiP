@@ -12,6 +12,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private ControlPanel _controlPanel;
     public static ControlPanel ControlPanel { get { return _instance._controlPanel; }}
 
+    [SerializeField] private AlienPanel _alienPanel;
+    public static AlienPanel AlienPanel { get { return _instance._alienPanel; }}
+
     private void Awake()
     {
         _instance = this;

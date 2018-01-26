@@ -10,16 +10,26 @@ public class ControlPanel : MonoBehaviour
 
     public event Action<Transmission.Data> OnLaunchTransmission;
 
+    private CanvasGroup _canvasGroup;
+
     private void Awake()
     {
+        _canvasGroup = GetComponent<CanvasGroup>();
         _launchButton.onClick.AddListener(OnLaunchClicked);
         _signalPanel.OnAddSignal += OnSignalPanelSignalClicked;
+        _currentTransmission.OnSignalChange += OnTransmissionChanged;
+    }
+
+    private void Start()
+    {
+        OnTransmissionChanged();
     }
 
     private void OnDestroy()
     {
         _launchButton.onClick.RemoveAllListeners();
         _signalPanel.OnAddSignal -= OnSignalPanelSignalClicked;
+        _currentTransmission.OnSignalChange -= OnTransmissionChanged;
     }
 
     public void OnLaunchClicked()
@@ -29,11 +39,24 @@ public class ControlPanel : MonoBehaviour
         {
             OnLaunchTransmission(_currentTransmission.GetData());
         }
+        
+        // Lock and clear until animation done
         _currentTransmission.Clear();
+        _canvasGroup.interactable = false;
     }
 
-    public void OnSignalPanelSignalClicked(Signal signal)
+    public void EnableUI()
+    {
+        _canvasGroup.interactable = true;
+    }
+
+    private void OnSignalPanelSignalClicked(Signal signal)
     {
         _currentTransmission.AddSignal(signal.Key);
+    }
+
+    private void OnTransmissionChanged()
+    {
+        _launchButton.interactable = _currentTransmission.IsFull();
     }
 }

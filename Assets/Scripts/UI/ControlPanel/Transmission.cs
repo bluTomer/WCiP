@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Transmission : MonoBehaviour
 {
@@ -17,12 +19,27 @@ public class Transmission : MonoBehaviour
     
     public const int NUMBER_OF_SIGNALS = 4;
     public Signal[] Signals { get; private set; }
+    public event Action OnSignalChange;
 
-    [SerializeField] private Transform[] SignalHolders;
+    [SerializeField] private Image[] _signalHolders;
+    [SerializeField] private Sprite[] _evaluationSprites;
 
     private void Awake()
     {
         Signals = new Signal[NUMBER_OF_SIGNALS];
+    }
+
+    public bool IsFull()
+    {
+        for (int i = 0; i < NUMBER_OF_SIGNALS; i++)
+        {
+            if (Signals[i] == null)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public Data GetData()
@@ -43,6 +60,11 @@ public class Transmission : MonoBehaviour
         {
             RemoveSignal(i);
         }
+
+        if (OnSignalChange != null)
+        {
+            OnSignalChange();
+        }
     }
     
     public void RemoveSignal(int index)
@@ -58,28 +80,39 @@ public class Transmission : MonoBehaviour
         var index = Signals.ToList().FindIndex(signal1 => signal == signal1);
         signal.DestroySelf();
         Signals[index] = null;
-    }
-
-    public bool AddSignal(SignalKey key)
-    {
-        for (int i = 0; i < NUMBER_OF_SIGNALS; i++)
+        
+        if (OnSignalChange != null)
         {
-            if (Signals[i] == null)
-            {
-                // Put signal here
-                SetupSignal(i, key);
-                return true;
-            }
+            OnSignalChange();
         }
-
-        return false;
     }
 
-    public void CopyTransmission(Transmission destinationTransmission)
+    public void AddSignal(SignalKey key)
     {
         for (int i = 0; i < NUMBER_OF_SIGNALS; i++)
         {
-            destinationTransmission.AddSignal(Signals[i].Key);
+            if (Signals[i] != null)
+            {
+                continue;
+            }
+            
+            // Put signal here
+            SetupSignal(i, key);
+            break;
+        }
+    }
+
+    public void SetEvaluation(Data transmissionData, Planet.Evaluation evaluation)
+    {
+        Clear();
+        
+        for (int i = 0; i < NUMBER_OF_SIGNALS; i++)
+        {
+            _signalHolders[i].sprite = _evaluationSprites[(int) evaluation.Results[i]];
+        }
+        foreach (var signal in transmissionData.Signals)
+        {
+            AddSignal(signal);
         }
     }
 
@@ -87,9 +120,13 @@ public class Transmission : MonoBehaviour
     {
         var signal = SignalFactory.CreateSignal(key);
         Signals[index] = signal;
-        signal.transform.SetParent(SignalHolders[index], false);
+        signal.transform.SetParent(_signalHolders[index].transform, false);
         signal.OnSignalClicked += OnSignalClicked;
-        // Maybe setup rect transform here
+         
+        if (OnSignalChange != null)
+        {
+            OnSignalChange();
+        }
     }
 
     private void OnSignalClicked(Signal signal)
