@@ -16,12 +16,20 @@ public class Planet : MonoBehaviour
 		public float Score = 0;
 		public Result[] Results = new Result[Transmission.NUMBER_OF_SIGNALS];
 	}
+
+	public enum State
+	{
+		Ongoing,
+		Won,
+		Lost
+	}
 	
 	public float RotationSpeed;
 	public float StepsToFailure = 8;
 	public Sprite AlienSpriteGood;
 	public Sprite AlienSpriteBad;
 	public Sprite AlienSpriteNeutral;
+	public State PlanetState;
 
 	private Transmission.Data _goalTransmission;
 	private Transmission.Data _lastTransmission;
@@ -34,6 +42,7 @@ public class Planet : MonoBehaviour
 	{
 		_parentPos = transform.parent.position;
 		RandomizeGoal();
+		PlanetState = State.Ongoing;
 		_likeness = 1.0f;
 		_angerMod = 1.0f / StepsToFailure;
 	}
@@ -57,6 +66,12 @@ public class Planet : MonoBehaviour
 
 	private void OnCollisionEnter2D(Collision2D other)
 	{
+		if (PlanetState != State.Ongoing)
+		{
+			// Interactions are only with Ongoing planets
+			return;
+		}
+		
 		var ray = other.gameObject.GetComponent<TransmissionRay>();
 		if (ray == null)
 		{
@@ -66,28 +81,37 @@ public class Planet : MonoBehaviour
 		_lastTransmission = ray.Transmission;
 		_lastEvaluation = EvaluateTransmission(ray.Transmission);
 
-		if (_lastEvaluation.Score < 0.0f)
+		if (_lastEvaluation.Score < 1.5f)
 		{
-			_likeness -= 0.1f;
+			_likeness -= _angerMod;
 		}
 		
 		GameManager.AlienPanel.Setup(GetAlienSprite(_lastEvaluation), _lastTransmission, _lastEvaluation, _likeness);
 		GameManager.AlienPanel.Show(OnAlienPanelDone);
-		Destroy(ray.gameObject);
 
 		if (_lastEvaluation.Score >= 3.9f)
 		{
-			// Planet won
+			OnPlanetWin();
 		}
 		else if (_likeness <= 0.0f)
 		{
-			// Planet lost
+			OnPlanetLose();
 		}
 	}
 
 	private void OnAlienPanelDone()
 	{
 		GameManager.ControlPanel.EnableUI();
+	}
+
+	private void OnPlanetWin()
+	{
+		PlanetState = State.Won;
+	}
+	
+	private void OnPlanetLose()
+	{
+		PlanetState = State.Lost;
 	}
 
 	private Sprite GetAlienSprite(Evaluation evaluation)

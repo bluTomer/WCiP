@@ -41,7 +41,7 @@ public class ControlPanel : MonoBehaviour
         }
         
         // Lock and clear until animation done
-        _currentTransmission.Clear();
+//        _currentTransmission.Clear();
         _canvasGroup.interactable = false;
     }
 

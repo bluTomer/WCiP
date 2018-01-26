@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -15,8 +16,25 @@ public class GameManager : MonoBehaviour
     [SerializeField] private AlienPanel _alienPanel;
     public static AlienPanel AlienPanel { get { return _instance._alienPanel; }}
 
+    [SerializeField] private Animator _uiAnimator;
+
     private void Awake()
     {
         _instance = this;
+    }
+
+    public void StartGame()
+    {
+        _uiAnimator.SetTrigger("Start");
+    }
+
+    public void Info()
+    {
+        _uiAnimator.SetTrigger("Info");
+    }
+
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(0);
     }
 }
