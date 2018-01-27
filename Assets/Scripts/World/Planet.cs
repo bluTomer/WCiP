@@ -24,33 +24,54 @@ public class Planet : MonoBehaviour
 		Lost
 	}
 	
-	public float RotationSpeed;
 	public float StepsToFailure = 8;
 	public Sprite AlienSpriteGood;
 	public Sprite AlienSpriteBad;
 	public Sprite AlienSpriteNeutral;
 	public State PlanetState;
+	[Range(0.5f, 1.5f)] public float _hoverMod = 1.0f;
+
+	[SerializeField] private ParticleSystem _loveParticles;
+	[SerializeField] private ParticleSystem _hateParticles;
+	[SerializeField] private GameObject _loveIcon;
+	[SerializeField] private GameObject _hateIcon;
+	[SerializeField] private AudioSource _loveSound;
+	[SerializeField] private AudioSource _hateSound;
+	[SerializeField] private AudioSource _neutralSound;
+	[SerializeField] private AlienPanel _detailPanel;
 
 	private Transmission.Data _goalTransmission;
 	private Transmission.Data _lastTransmission;
 	private Evaluation _lastEvaluation;
-	private Vector3 _parentPos;
 	private float _likeness;
 	private float _angerMod;
+
+	private Animator _animator;
+
+	private void Awake()
+	{
+		_animator = GetComponent<Animator>();
+	}
 	
 	private void Start()
 	{
-		_parentPos = transform.parent.position;
+		_animator.SetFloat("SpeedMult", _hoverMod);
 		RandomizeGoal();
 		PlanetState = State.Ongoing;
 		_likeness = 1.0f;
 		_angerMod = 1.0f / StepsToFailure;
 	}
-	
-	private void Update()
+
+	public void OnPanelClicked()
 	{
-		transform.RotateAround(_parentPos, Vector3.forward, RotationSpeed * Time.deltaTime);
-		transform.RotateAround(transform.position, Vector3.forward, RotationSpeed * Time.deltaTime * -1.0f);
+		if (_lastTransmission == null)
+		{
+			// No transmissions yet
+			return;
+		}
+		
+		_detailPanel.Setup(AlienSpriteBad, _lastTransmission, _lastEvaluation, _likeness);
+		_animator.SetTrigger("ShowPanel");
 	}
 
 	private void RandomizeGoal()
@@ -66,6 +87,24 @@ public class Planet : MonoBehaviour
 
 	private void OnCollisionEnter2D(Collision2D other)
 	{
+		switch (PlanetState)
+		{
+			case State.Ongoing:
+				// Nothing - keep running
+				break;
+			case State.Won:
+				_loveParticles.Play();
+				_loveSound.Play();
+				GameManager.ControlPanel.EnableUI();
+				return;
+			case State.Lost:
+				_hateParticles.Play();
+				_hateSound.Play();
+				GameManager.ControlPanel.EnableUI();
+				return;
+			default:
+				throw new ArgumentOutOfRangeException();
+		}
 		if (PlanetState != State.Ongoing)
 		{
 			// Interactions are only with Ongoing planets
@@ -81,7 +120,7 @@ public class Planet : MonoBehaviour
 		_lastTransmission = ray.Transmission;
 		_lastEvaluation = EvaluateTransmission(ray.Transmission);
 
-		if (_lastEvaluation.Score < 1.5f)
+		if (_lastEvaluation.Score < 1.0f)
 		{
 			_likeness -= _angerMod;
 		}
@@ -107,24 +146,31 @@ public class Planet : MonoBehaviour
 	private void OnPlanetWin()
 	{
 		PlanetState = State.Won;
+		_loveParticles.Play();
+		_loveIcon.SetActive(true);
 	}
 	
 	private void OnPlanetLose()
 	{
 		PlanetState = State.Lost;
+		_hateParticles.Play();
+		_hateIcon.SetActive(true);
 	}
 
 	private Sprite GetAlienSprite(Evaluation evaluation)
 	{
 		if (evaluation.Score > 1.0f)
 		{
+			_loveSound.Play();
 			return AlienSpriteGood;
 		}
 		if (evaluation.Score < -1.0f)
 		{
+			_hateSound.Play();
 			return AlienSpriteBad;
 		}
 		
+		_neutralSound.Play();
 		return AlienSpriteNeutral;
 	}
 

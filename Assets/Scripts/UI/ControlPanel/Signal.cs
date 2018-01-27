@@ -11,11 +11,14 @@ public class Signal : MonoBehaviour
 	[SerializeField] private Image _image;
 	[SerializeField] private Button _button;
 
+	private AudioSource _audio;
+
 	public void Setup(SignalKey key, Sprite sprite)
 	{
 		Key = key;
 		_image.sprite = sprite;
 		_button.onClick.AddListener(OnClick);
+		_audio = GetComponent<AudioSource>();
 	}
 
 	private void OnDestroy()
@@ -30,6 +33,7 @@ public class Signal : MonoBehaviour
 
 	public void OnClick()
 	{
+		_audio.Play();
 		if (OnSignalClicked != null)
 		{
 			OnSignalClicked(this);
