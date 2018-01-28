@@ -972,7 +972,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5f35335223224507b811cba7d42fa93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StepsToFailure: 6
+  StepsToFailure: 12
   AlienSpriteGood: {fileID: 21300000, guid: b53226bc9796c40678ef8e40b5fa1407, type: 3}
   AlienSpriteBad: {fileID: 21300000, guid: 75d694201bb4340a78dfe52e6367ec3a, type: 3}
   AlienSpriteNeutral: {fileID: 21300000, guid: 9c8bf1d0bdf8f40648f1abecd06a3adf, type: 3}

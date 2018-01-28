@@ -893,7 +893,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5f35335223224507b811cba7d42fa93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StepsToFailure: 10
+  StepsToFailure: 15
   AlienSpriteGood: {fileID: 21300000, guid: 2862110ea177e4653981ada181caef85, type: 3}
   AlienSpriteBad: {fileID: 21300000, guid: 0decc90ef3e76481982ef0d7c098aad4, type: 3}
   AlienSpriteNeutral: {fileID: 21300000, guid: 480ac481a6b084aeaac3339f70450255, type: 3}

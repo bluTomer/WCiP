@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class Transmission : MonoBehaviour
 {
+    [Serializable]
     public class Data
     {
         public SignalKey[] Signals;

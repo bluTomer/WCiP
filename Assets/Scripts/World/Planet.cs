@@ -40,7 +40,7 @@ public class Planet : MonoBehaviour
 	[SerializeField] private AudioSource _neutralSound;
 	[SerializeField] private AlienPanel _detailPanel;
 
-	private Transmission.Data _goalTransmission;
+	public Transmission.Data _goalTransmission;
 	private Transmission.Data _lastTransmission;
 	private Evaluation _lastEvaluation;
 	private float _likeness;
@@ -119,11 +119,7 @@ public class Planet : MonoBehaviour
 		
 		_lastTransmission = ray.Transmission;
 		_lastEvaluation = EvaluateTransmission(ray.Transmission);
-
-		if (_lastEvaluation.Score < 1.0f)
-		{
-			_likeness -= _angerMod;
-		}
+		_likeness -= _angerMod;
 		
 		GameManager.AlienPanel.Setup(GetAlienSprite(_lastEvaluation), _lastTransmission, _lastEvaluation, _likeness);
 		GameManager.AlienPanel.Show(OnAlienPanelDone);
@@ -162,11 +158,13 @@ public class Planet : MonoBehaviour
 		if (evaluation.Score > 1.0f)
 		{
 			_loveSound.Play();
+			_loveParticles.Play();
 			return AlienSpriteGood;
 		}
 		if (evaluation.Score < -1.0f)
 		{
 			_hateSound.Play();
+			_hateParticles.Play();
 			return AlienSpriteBad;
 		}
 		
